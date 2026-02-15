@@ -75,6 +75,7 @@ void mmap_fork_end(int child)
     }
 }
 
+#ifndef __ANDROID__
 /* Protected by mmap_lock. */
 static IntervalTreeRoot shm_regions;
 
@@ -112,6 +113,7 @@ static void shm_region_rm_complete(abi_ptr start, abi_ptr last)
         }
     }
 }
+#endif /* !__ANDROID__ */
 
 /*
  * Validate target prot bitmask.
