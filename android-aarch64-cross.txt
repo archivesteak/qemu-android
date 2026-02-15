@@ -1,0 +1,40 @@
+# Meson cross-compilation file for QEMU targeting Android AArch64
+# Usage: ../configure --cross-file=../android-aarch64-cross.txt ...
+#
+# Set NDK_PATH environment variable before running configure:
+#   export NDK_PATH=$HOME/android-ndk-r28b
+
+[constants]
+# These are overridden by the setup script; defaults for documentation
+ndk_path = '/path/to/android-ndk-r28b'
+toolchain = '/path/to/android-ndk-r28b/toolchains/llvm/prebuilt/linux-x86_64'
+api = '24'
+
+[binaries]
+c = toolchain / 'bin' / ('aarch64-linux-android' + api + '-clang')
+cpp = toolchain / 'bin' / ('aarch64-linux-android' + api + '-clang++')
+ar = toolchain / 'bin' / 'llvm-ar'
+strip = toolchain / 'bin' / 'llvm-strip'
+ranlib = toolchain / 'bin' / 'llvm-ranlib'
+nm = toolchain / 'bin' / 'llvm-nm'
+objcopy = toolchain / 'bin' / 'llvm-objcopy'
+objdump = toolchain / 'bin' / 'llvm-objdump'
+readelf = toolchain / 'bin' / 'llvm-readelf'
+pkgconfig = '/usr/bin/pkg-config'
+
+[built-in options]
+c_args = ['-fPIC', '-DANDROID', '-D__ANDROID_API__=24']
+c_link_args = ['-llog', '-landroid']
+cpp_args = ['-fPIC', '-DANDROID', '-D__ANDROID_API__=24']
+cpp_link_args = ['-llog', '-landroid']
+
+[host_machine]
+system = 'linux'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'
+
+[properties]
+sys_root = toolchain / 'sysroot'
+pkg_config_libdir = '/tmp/android-deps/lib/pkgconfig'
+needs_exe_wrapper = true
