@@ -17,7 +17,9 @@
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include "qemu/osdep.h"
+#ifndef __ANDROID__
 #include <sys/shm.h>
+#endif
 #include "trace.h"
 #include "exec/log.h"
 #include "exec/page-protection.h"
@@ -1302,6 +1304,19 @@ static inline abi_ulong target_shmlba(CPUArchState *cpu_env)
 #define HOST_FORCE_SHMLBA 0
 #endif
 
+#ifdef __ANDROID__
+/* SysV shared memory is not available on Android */
+abi_ulong target_shmat(CPUArchState *cpu_env, int shmid,
+                       abi_ulong shmaddr, int shmflg)
+{
+    return -TARGET_ENOSYS;
+}
+
+abi_long target_shmdt(abi_ulong shmaddr)
+{
+    return -TARGET_ENOSYS;
+}
+#else /* !__ANDROID__ */
 abi_ulong target_shmat(CPUArchState *cpu_env, int shmid,
                        abi_ulong shmaddr, int shmflg)
 {
@@ -1496,3 +1511,4 @@ abi_long target_shmdt(abi_ulong shmaddr)
     }
     return rv;
 }
+#endif /* !__ANDROID__ */
