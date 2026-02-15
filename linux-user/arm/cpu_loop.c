@@ -161,7 +161,8 @@ static void arm_kernel_cmpxchg64_helper(CPUARMState *env)
 }
 
 /* Handle a jump to the kernel code page.  */
-static int
+int do_kernel_trap(CPUARMState *env);  /* prototype for library API use */
+int
 do_kernel_trap(CPUARMState *env)
 {
     uint32_t addr;

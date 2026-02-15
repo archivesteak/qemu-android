@@ -22,5 +22,6 @@ vdso_le_inc = gen_vdso.process('vdso-le.so',
                                extra_args: ['-s', 'sigreturn_codes'])
 
 linux_user_ss.add(when: 'TARGET_ARM', if_true: [
-    vdso_be8_inc, vdso_be32_inc, vdso_le_inc
+    vdso_be8_inc, vdso_be32_inc, vdso_le_inc,
+    files('../../android-user/qemu-arm-api.c'),
 ])

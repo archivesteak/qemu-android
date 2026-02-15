@@ -6,6 +6,7 @@ linux_user_ss = ss.source_set()
 
 common_user_inc += include_directories('include/host/' / host_arch)
 common_user_inc += include_directories('include')
+common_user_inc += include_directories('../android-user')
 
 linux_user_ss.add(files(
   'elfload.c',
