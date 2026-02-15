@@ -33,6 +33,20 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/wait.h>
+/*
+ * On Android, <sys/mount.h> transitively includes <linux/termios.h>,
+ * which defines struct termios and sets include guards. We must do
+ * the termios rename BEFORE including sys/mount.h so that the kernel
+ * header defines struct host_termios instead.
+ */
+#define termios host_termios
+#define termios2 host_termios2
+#define winsize host_winsize
+#define termio host_termio
+#define sgttyb host_sgttyb /* same as target */
+#define tchars host_tchars /* same as target */
+#define ltchars host_ltchars /* same as target */
+
 #include <sys/mount.h>
 #include <sys/file.h>
 #include <sys/fsuid.h>
@@ -84,14 +98,6 @@
 #ifdef HAVE_SYS_KCOV_H
 #include <sys/kcov.h>
 #endif
-
-#define termios host_termios
-#define termios2 host_termios2
-#define winsize host_winsize
-#define termio host_termio
-#define sgttyb host_sgttyb /* same as target */
-#define tchars host_tchars /* same as target */
-#define ltchars host_ltchars /* same as target */
 
 #include <linux/termios.h>
 #include <linux/unistd.h>
