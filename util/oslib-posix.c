@@ -28,6 +28,9 @@
 
 #include "qemu/osdep.h"
 #include <termios.h>
+#ifdef __ANDROID__
+#include <sys/syscall.h>
+#endif
 
 #include <glib/gprintf.h>
 
@@ -984,6 +987,33 @@ void qemu_close_all_open_fd(const int *skip, unsigned int nskip)
 
 int qemu_shm_alloc(size_t size, Error **errp)
 {
+#ifdef __ANDROID__
+    /* Android < API 26 lacks shm_open; use memfd_create or tmpfile fallback */
+    int fd = -1;
+#if __ANDROID_API__ >= 26
+    g_autoptr(GString) shm_name = g_string_new(NULL);
+    g_string_printf(shm_name, "/qemu-%d-shm", getpid());
+    fd = shm_open(shm_name->str, O_RDWR | O_CREAT | O_EXCL, 0600);
+    if (fd >= 0) {
+        shm_unlink(shm_name->str);
+    }
+#endif
+    if (fd < 0) {
+        /* memfd_create via syscall (available since Linux 3.17) */
+        fd = syscall(__NR_memfd_create, "qemu-shm", 0U);
+    }
+    if (fd < 0) {
+        error_setg_errno(errp, errno, "failed to create shared memory");
+        return -1;
+    }
+    if (ftruncate(fd, size) == -1) {
+        error_setg_errno(errp, errno,
+                         "failed to resize shared memory to %zu", size);
+        close(fd);
+        return -1;
+    }
+    return fd;
+#else
     g_autoptr(GString) shm_name = g_string_new(NULL);
     int fd, oflag, cur_sequence;
     static int sequence;
@@ -1032,4 +1062,5 @@ int qemu_shm_alloc(size_t size, Error **errp)
     }
 
     return fd;
+#endif /* __ANDROID__ */
 }
