@@ -85,6 +85,22 @@
 #include <sys/kcov.h>
 #endif
 
+#ifdef __ANDROID__
+/*
+ * Android/Bionic lacks many Linux-specific ioctl headers.
+ * Include only what's available; ioctl translation for missing
+ * subsystems will be disabled.
+ */
+#include <linux/unistd.h>
+#include <linux/fs.h>
+#include <linux/reboot.h>
+#include <linux/filter.h>
+#include <linux/netlink.h>
+#include <linux/rtc.h>
+#include <termios.h>
+#define host_termios termios
+#define host_winsize winsize
+#else /* !__ANDROID__ */
 #define termios host_termios
 #define termios2 host_termios2
 #define winsize host_winsize
@@ -128,6 +144,7 @@
 #include <libdrm/drm.h>
 #include <libdrm/i915_drm.h>
 #endif
+#endif /* __ANDROID__ */
 #include "linux_loop.h"
 #include "uname.h"
 
