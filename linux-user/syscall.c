@@ -1303,7 +1303,7 @@ static inline abi_long copy_from_user_timezone(struct timezone *tz,
 }
 #endif
 
-#if defined(TARGET_NR_mq_open) && defined(__NR_mq_open)
+#if defined(TARGET_NR_mq_open) && defined(__NR_mq_open) && !defined(__ANDROID__) && !defined(__ANDROID__)
 #include <mqueue.h>
 
 static inline abi_long copy_from_user_mq_attr(struct mq_attr *attr,
@@ -13464,7 +13464,7 @@ static abi_long do_syscall1(CPUArchState *cpu_env, int num, abi_long arg1,
 #endif
 #endif
 
-#if defined(TARGET_NR_mq_open) && defined(__NR_mq_open)
+#if defined(TARGET_NR_mq_open) && defined(__NR_mq_open) && !defined(__ANDROID__)
     case TARGET_NR_mq_open:
         {
             struct mq_attr posix_mq_attr;

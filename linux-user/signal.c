@@ -18,6 +18,22 @@
  */
 #include "qemu/osdep.h"
 #include "qemu/bitops.h"
+
+#ifdef __ANDROID__
+/* Bionic lacks sigorset; provide inline implementation */
+static inline int sigorset(sigset_t *dest, const sigset_t *left,
+                           const sigset_t *right)
+{
+    unsigned long *d = (unsigned long *)dest;
+    const unsigned long *l = (const unsigned long *)left;
+    const unsigned long *r = (const unsigned long *)right;
+    unsigned int i;
+    for (i = 0; i < sizeof(sigset_t) / sizeof(unsigned long); i++) {
+        d[i] = l[i] | r[i];
+    }
+    return 0;
+}
+#endif
 #include "qemu/cutils.h"
 #include "gdbstub/user.h"
 #include "exec/page-protection.h"
