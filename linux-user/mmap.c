@@ -17,9 +17,7 @@
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include "qemu/osdep.h"
-#ifndef __ANDROID__
 #include <sys/shm.h>
-#endif
 #include "trace.h"
 #include "exec/log.h"
 #include "exec/page-protection.h"
@@ -75,7 +73,6 @@ void mmap_fork_end(int child)
     }
 }
 
-#ifndef __ANDROID__
 /* Protected by mmap_lock. */
 static IntervalTreeRoot shm_regions;
 
@@ -113,7 +110,6 @@ static void shm_region_rm_complete(abi_ptr start, abi_ptr last)
         }
     }
 }
-#endif /* !__ANDROID__ */
 
 /*
  * Validate target prot bitmask.
@@ -1306,19 +1302,6 @@ static inline abi_ulong target_shmlba(CPUArchState *cpu_env)
 #define HOST_FORCE_SHMLBA 0
 #endif
 
-#ifdef __ANDROID__
-/* SysV shared memory is not available on Android */
-abi_ulong target_shmat(CPUArchState *cpu_env, int shmid,
-                       abi_ulong shmaddr, int shmflg)
-{
-    return -TARGET_ENOSYS;
-}
-
-abi_long target_shmdt(abi_ulong shmaddr)
-{
-    return -TARGET_ENOSYS;
-}
-#else /* !__ANDROID__ */
 abi_ulong target_shmat(CPUArchState *cpu_env, int shmid,
                        abi_ulong shmaddr, int shmflg)
 {
@@ -1513,4 +1496,3 @@ abi_long target_shmdt(abi_ulong shmaddr)
     }
     return rv;
 }
-#endif /* !__ANDROID__ */

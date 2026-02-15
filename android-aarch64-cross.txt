@@ -8,7 +8,7 @@
 # These are overridden by the setup script; defaults for documentation
 ndk_path = '/path/to/android-ndk-r28b'
 toolchain = '/path/to/android-ndk-r28b/toolchains/llvm/prebuilt/linux-x86_64'
-api = '24'
+api = '26'
 
 [binaries]
 c = toolchain / 'bin' / ('aarch64-linux-android' + api + '-clang')
@@ -23,9 +23,9 @@ readelf = toolchain / 'bin' / 'llvm-readelf'
 pkgconfig = '/usr/bin/pkg-config'
 
 [built-in options]
-c_args = ['-fPIC', '-DANDROID', '-D__ANDROID_API__=24']
+c_args = ['-fPIC', '-DANDROID', '-D__ANDROID_API__=26']
 c_link_args = ['-llog', '-landroid']
-cpp_args = ['-fPIC', '-DANDROID', '-D__ANDROID_API__=24']
+cpp_args = ['-fPIC', '-DANDROID', '-D__ANDROID_API__=26']
 cpp_link_args = ['-llog', '-landroid']
 
 [host_machine]
