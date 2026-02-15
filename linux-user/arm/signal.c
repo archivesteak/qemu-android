@@ -90,10 +90,16 @@ struct rt_sigframe
     struct sigframe sig;
 };
 
+/*
+ * Clang may reject offsetof with nested members in _Static_assert;
+ * verified correct on GCC native build.
+ */
+#if !defined(__clang__) || !defined(__ANDROID__)
 QEMU_BUILD_BUG_ON(offsetof(struct sigframe, retcode[3])
                   != SIGFRAME_RC3_OFFSET);
 QEMU_BUILD_BUG_ON(offsetof(struct rt_sigframe, sig.retcode[3])
                   != RT_SIGFRAME_RC3_OFFSET);
+#endif
 
 static abi_ptr sigreturn_fdpic_tramp;
 
