@@ -3942,12 +3942,15 @@ static inline abi_long host_to_target_seminfo(abi_ulong target_addr,
     return 0;
 }
 
+#ifndef __ANDROID__
+/* Android's sys/sem.h already defines union semun */
 union semun {
 	int val;
 	struct semid_ds *buf;
 	unsigned short *array;
 	struct seminfo *__buf;
 };
+#endif
 
 union target_semun {
 	int val;
@@ -4209,6 +4212,15 @@ struct target_msqid_ds
     abi_ulong __unused5;
 };
 
+/*
+ * Android's msqid_ds uses msg_cbytes instead of __msg_cbytes.
+ */
+#ifdef __ANDROID__
+#define HOST_MSG_CBYTES(md) ((md)->msg_cbytes)
+#else
+#define HOST_MSG_CBYTES(md) ((md)->__msg_cbytes)
+#endif
+
 static inline abi_long target_to_host_msqid_ds(struct msqid_ds *host_md,
                                                abi_ulong target_addr)
 {
@@ -4221,7 +4233,7 @@ static inline abi_long target_to_host_msqid_ds(struct msqid_ds *host_md,
     host_md->msg_stime = tswapal(target_md->msg_stime);
     host_md->msg_rtime = tswapal(target_md->msg_rtime);
     host_md->msg_ctime = tswapal(target_md->msg_ctime);
-    host_md->__msg_cbytes = tswapal(target_md->__msg_cbytes);
+    HOST_MSG_CBYTES(host_md) = tswapal(target_md->__msg_cbytes);
     host_md->msg_qnum = tswapal(target_md->msg_qnum);
     host_md->msg_qbytes = tswapal(target_md->msg_qbytes);
     host_md->msg_lspid = tswapal(target_md->msg_lspid);
@@ -4242,7 +4254,7 @@ static inline abi_long host_to_target_msqid_ds(abi_ulong target_addr,
     target_md->msg_stime = tswapal(host_md->msg_stime);
     target_md->msg_rtime = tswapal(host_md->msg_rtime);
     target_md->msg_ctime = tswapal(host_md->msg_ctime);
-    target_md->__msg_cbytes = tswapal(host_md->__msg_cbytes);
+    target_md->__msg_cbytes = tswapal(HOST_MSG_CBYTES(host_md));
     target_md->msg_qnum = tswapal(host_md->msg_qnum);
     target_md->msg_qbytes = tswapal(host_md->msg_qbytes);
     target_md->msg_lspid = tswapal(host_md->msg_lspid);
@@ -11439,7 +11451,11 @@ static abi_long do_syscall1(CPUArchState *cpu_env, int num, abi_long arg1,
         return ret;
 #endif
     case TARGET_NR_vhangup:
+#ifdef __ANDROID__
+        return get_errno(syscall(__NR_vhangup));
+#else
         return get_errno(vhangup());
+#endif
 #ifdef TARGET_NR_syscall
     case TARGET_NR_syscall:
         return do_syscall(cpu_env, arg1 & 0xffff, arg2, arg3, arg4, arg5,
